@@ -6,7 +6,7 @@ class WorkoutViewModel: ObservableObject {
     @Published var squatCount: Int = 0
     @Published var angle: Double = 0.0
 
-    // Process frame and calculate angle
+    // Process frame and calculate angles
     func processFrame(buffer: CMSampleBuffer) {
         DispatchQueue.global(qos: .userInitiated).async {
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
