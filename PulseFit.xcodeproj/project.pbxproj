@@ -29,9 +29,30 @@
 		16D0ABB32CB35BE10024CA7D /* PulseFitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PulseFitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		917C17D82CE63F59006794A3 /* Exceptions for "PulseFit" folder in "PulseFitTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"MLModels/yolo11n-pose.mlpackage",
+			);
+			target = 16D0ABA82CB35BE10024CA7D /* PulseFitTests */;
+		};
+		917C17D92CE63F59006794A3 /* Exceptions for "PulseFit" folder in "PulseFitUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"MLModels/yolo11n-pose.mlpackage",
+			);
+			target = 16D0ABB22CB35BE10024CA7D /* PulseFitUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		16D0AB9B2CB35BDD0024CA7D /* PulseFit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				917C17D82CE63F59006794A3 /* Exceptions for "PulseFit" folder in "PulseFitTests" target */,
+				917C17D92CE63F59006794A3 /* Exceptions for "PulseFit" folder in "PulseFitUITests" target */,
+			);
 			path = PulseFit;
 			sourceTree = "<group>";
 		};
