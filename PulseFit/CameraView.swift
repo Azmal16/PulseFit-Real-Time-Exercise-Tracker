@@ -2,7 +2,7 @@ import SwiftUI
 import AVFoundation
 
 struct CameraView: View {
-    @ObservedObject var viewModel = CameraViewModel()
+    @StateObject var viewModel = CameraViewModel()
 
     var body: some View {
         ZStack {

@@ -3,6 +3,11 @@ import AVFoundation
 class CameraManager: NSObject, ObservableObject {
     private var session: AVCaptureSession?
     private var videoOutput: AVCaptureVideoDataOutput?
+    private let poseEstimationViewModel = PoseEstimationViewModel()
+    
+//    init(poseEstimationViewModel: PoseEstimationViewModel) {
+//        self.poseEstimationViewModel = poseEstimationViewModel
+//    }
     
     // Setup the camera session
     func setupSession() {
@@ -33,14 +38,20 @@ class CameraManager: NSObject, ObservableObject {
     // Start the camera session
     func startSession() {
         DispatchQueue.global(qos: .background).async {
-            self.session?.startRunning()
+            guard let session = self.session else { return }
+            if !session.isRunning {
+                session.startRunning()
+            } else { return }
         }
     }
     
     // Stop the camera session
     func stopSession() {
         DispatchQueue.global(qos: .background).async {
-            self.session?.stopRunning()
+            guard let session = self.session else { return }
+            if session.isRunning {
+                session.stopRunning()
+            } else { return }
         }
     }
     
@@ -52,6 +63,9 @@ class CameraManager: NSObject, ObservableObject {
 // Video data output delegate
 extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        // Here you'll later handle frame processing for pose estimation
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        
+        // Pass the pixelBuffer to the PoseEstimationViewModel for processing
+        poseEstimationViewModel.performPoseEstimation(on: pixelBuffer)
     }
 }
