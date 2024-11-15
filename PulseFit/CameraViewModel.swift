@@ -2,7 +2,7 @@ import Combine
 import AVFoundation
 
 class CameraViewModel: ObservableObject {
-    private var cameraManager: CameraManager
+    var cameraManager: CameraManager
     @Published var previewLayer: AVCaptureVideoPreviewLayer?
     
     init(cameraManager: CameraManager = CameraManager()) {

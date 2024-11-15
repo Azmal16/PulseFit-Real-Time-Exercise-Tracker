@@ -8,6 +8,22 @@ struct CameraView: View {
         ZStack {
             CameraPreview(previewLayer: viewModel.previewLayer)
                 .edgesIgnoringSafeArea(.all)
+            
+            if let leftShoulder = viewModel.cameraManager.poseEstimationViewModel.leftShoulderPoint {
+                      Circle()
+                          .fill(Color.red)
+                          .frame(width: 10, height: 10)
+                          .position(x: leftShoulder.x * UIScreen.main.bounds.width,
+                                    y: leftShoulder.y * UIScreen.main.bounds.height)
+                  }
+                  
+                  if let rightShoulder = viewModel.cameraManager.poseEstimationViewModel.rightShoulderPoint {
+                      Circle()
+                          .fill(Color.blue)
+                          .frame(width: 10, height: 10)
+                          .position(x: rightShoulder.x * UIScreen.main.bounds.width,
+                                    y: rightShoulder.y * UIScreen.main.bounds.height)
+                  }
         }
         .onAppear {
             viewModel.startSession()

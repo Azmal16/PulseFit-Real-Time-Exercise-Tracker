@@ -3,11 +3,14 @@ import AVFoundation
 class CameraManager: NSObject, ObservableObject {
     private var session: AVCaptureSession?
     private var videoOutput: AVCaptureVideoDataOutput?
-    private let poseEstimationViewModel = PoseEstimationViewModel()
+    let poseEstimationViewModel = PoseEstimationViewModel()
     
 //    init(poseEstimationViewModel: PoseEstimationViewModel) {
 //        self.poseEstimationViewModel = poseEstimationViewModel
 //    }
+    
+    @Published var leftShoulderPoint: CGPoint?
+    @Published var rightShoulderPoint: CGPoint?
     
     // Setup the camera session
     func setupSession() {
@@ -66,6 +69,9 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         
         // Pass the pixelBuffer to the PoseEstimationViewModel for processing
-        poseEstimationViewModel.performPoseEstimation(on: pixelBuffer)
+        DispatchQueue.global(qos: .userInitiated).async {
+                    self.poseEstimationViewModel.performPoseEstimation(on: pixelBuffer)
+                }
+//        poseEstimationViewModel.performPoseEstimation(on: pixelBuffer)
     }
 }
