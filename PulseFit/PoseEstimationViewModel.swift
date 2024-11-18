@@ -10,12 +10,19 @@ import CoreML
 import Vision
 import Combine
 
+protocol PoseEstimationView {
+    func points(left: CGPoint, right: CGPoint)
+}
+
 class PoseEstimationViewModel: ObservableObject {
     private var model: VNCoreMLModel
     private var request: VNCoreMLRequest?
+    @Published var cameraViewModel: CameraViewModel?
 
     @Published var leftShoulderPoint: CGPoint?
     @Published var rightShoulderPoint: CGPoint?
+    
+    var delegate: PoseEstimationView?
     
     init() {
         // Load the YOLOv11 model from the .mlpackage file
@@ -28,49 +35,62 @@ class PoseEstimationViewModel: ObservableObject {
                 print("Pose estimation error: \(error)")
                 return
             }
+            print("Request Results: \(String(describing: request.results))")
             self?.processPoseObservations(request.results)
         }
     }
     
     func performPoseEstimation(on pixelBuffer: CVPixelBuffer) {
-        guard let request = request else { return }
+         guard let request = request else { return }
+         
+         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+         do {
+             try handler.perform([request])
+         } catch {
+             print("Error performing pose estimation: \(error)")
+         }
+     }
 
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
-        do {
-            try handler.perform([request])
-           // print("Running Pose Estimation Model")
-        } catch {
-            print("Error performing pose estimation: \(error)")
-        }
-    }
 
     private func processPoseObservations(_ observations: [Any]?) {
-        guard let observations = observations as? [VNRecognizedPointsObservation] else { return }
-        
-        // Iterate through the detected observations (only one person supported here)
-        for observation in observations {
-            guard let recognizedPoints = try? observation.recognizedPoints(forGroupKey: .all) else { continue }
-
-            // Extract the left and right shoulder points
-            if let leftShoulder = recognizedPoints[.bodyLandmarkKeyLeftShoulder],
-               leftShoulder.confidence > 0.5 { // Filter low-confidence points
-                DispatchQueue.main.async {
-                    self.leftShoulderPoint = CGPoint(x: leftShoulder.x, y: 1 - leftShoulder.y)
-                    print("leftShoulderPoint: \(self.leftShoulderPoint!)")
-                }
-            } else {
-                leftShoulderPoint = nil
-            }
-
-            if let rightShoulder = recognizedPoints[.bodyLandmarkKeyRightShoulder],
-               rightShoulder.confidence > 0.5 {
-                DispatchQueue.main.async {
-                    self.rightShoulderPoint = CGPoint(x: rightShoulder.x, y: 1 - rightShoulder.y)
-                    print("rightShoulderPoint: \(self.rightShoulderPoint!)")
-                }
-            } else {
-                rightShoulderPoint = nil
-            }
-        }
-    }
+         guard let observations = observations as? [VNCoreMLFeatureValueObservation],
+               let multiArray = observations.first?.featureValue.multiArrayValue else { return }
+         
+         let keypoints = extractKeypoints(from: multiArray)
+         
+         // Update left and right shoulder points
+         DispatchQueue.main.async { [weak self] in
+             self?.leftShoulderPoint = keypoints.leftShoulder
+             self?.rightShoulderPoint = keypoints.rightShoulder
+             
+             if let lponit = keypoints.leftShoulder, let rpoint = keypoints.rightShoulder {
+                 
+                 self?.delegate?.points(left: lponit, right: rpoint)
+             }
+         }
+     }
+     
+     private func extractKeypoints(from multiArray: MLMultiArray) -> (leftShoulder: CGPoint?, rightShoulder: CGPoint?) {
+         // Indices for shoulders (example: use actual indices for YOLO model)
+         let leftShoulderIndex = 5
+         let rightShoulderIndex = 6
+         
+         // Extract and normalize keypoints
+         func getNormalizedPoint(at index: Int) -> CGPoint? {
+             let xIndex = index * 3
+             let yIndex = xIndex + 1
+             let confidenceIndex = yIndex + 1
+             
+             let x = multiArray[xIndex].floatValue
+             let y = multiArray[yIndex].floatValue
+             let confidence = multiArray[confidenceIndex].floatValue
+             
+             return confidence > 0.5 ? CGPoint(x: CGFloat(x), y: CGFloat(y)) : nil
+         }
+         
+         let leftShoulder = getNormalizedPoint(at: leftShoulderIndex)
+         let rightShoulder = getNormalizedPoint(at: rightShoulderIndex)
+         
+         return (leftShoulder, rightShoulder)
+     }
 }

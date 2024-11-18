@@ -3,14 +3,14 @@ import AVFoundation
 class CameraManager: NSObject, ObservableObject {
     private var session: AVCaptureSession?
     private var videoOutput: AVCaptureVideoDataOutput?
-    let poseEstimationViewModel = PoseEstimationViewModel()
+    @Published var poseEstimationViewModel: PoseEstimationViewModel
     
-//    init(poseEstimationViewModel: PoseEstimationViewModel) {
-//        self.poseEstimationViewModel = poseEstimationViewModel
-//    }
+    init(poseEstimationViewModel: PoseEstimationViewModel) {
+        self.poseEstimationViewModel = poseEstimationViewModel
+    }
     
-    @Published var leftShoulderPoint: CGPoint?
-    @Published var rightShoulderPoint: CGPoint?
+//    @Published var leftShoulderPoint: CGPoint?
+//    @Published var rightShoulderPoint: CGPoint?
     
     // Setup the camera session
     func setupSession() {

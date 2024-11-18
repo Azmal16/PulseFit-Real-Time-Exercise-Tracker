@@ -2,10 +2,16 @@ import Combine
 import AVFoundation
 
 class CameraViewModel: ObservableObject {
-    var cameraManager: CameraManager
+    //var poseEstimationVM: PoseEstimationViewModel
+    @Published var cameraManager: CameraManager
     @Published var previewLayer: AVCaptureVideoPreviewLayer?
     
-    init(cameraManager: CameraManager = CameraManager()) {
+//    @Published var leftShoulderPoint: CGPoint?
+//    @Published var rightShoulderPoint: CGPoint?
+    
+    init(poseEstimationVM: PoseEstimationViewModel,
+         cameraManager: CameraManager) {
+        //self.poseEstimationVM = poseEstimationVM
         self.cameraManager = cameraManager
         setupCamera()
     }
