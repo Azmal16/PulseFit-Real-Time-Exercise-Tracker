@@ -15,10 +15,11 @@ protocol PoseEstimationView {
 }
 
 class PoseEstimationViewModel: ObservableObject {
+    
     private var model: VNCoreMLModel
     private var request: VNCoreMLRequest?
+    
     @Published var cameraViewModel: CameraViewModel?
-
     @Published var leftShoulderPoint: CGPoint?
     @Published var rightShoulderPoint: CGPoint?
     
