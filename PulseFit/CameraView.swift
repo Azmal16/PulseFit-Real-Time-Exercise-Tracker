@@ -3,7 +3,7 @@ import AVFoundation
 
 struct CameraView: View {
     //@ObservedObject var poseEstimationViewModel: PoseEstimationViewModel
-    @StateObject var viewModel = CameraViewModel(poseEstimationVM: PoseEstimationViewModel(), cameraManager: CameraManager(poseEstimationViewModel: PoseEstimationViewModel()))
+    @StateObject var viewModel = CameraViewModel(poseEstimationVM: PoseEstimationViewModel(imageWidth: 640, imageHeight: 384), cameraManager: CameraManager(poseEstimationViewModel: PoseEstimationViewModel(imageWidth: 640, imageHeight: 384)))
     @State var leftShoulder: CGPoint?
     @State var rightShoulder: CGPoint?
     
@@ -50,7 +50,6 @@ struct CameraPreview: UIViewRepresentable {
             previewLayer.frame = view.bounds
             view.layer.addSublayer(previewLayer)
         }
-        
         return view
     }
     
@@ -65,6 +64,4 @@ extension CameraView: PoseEstimationView {
         leftShoulder = left
         rightShoulder = right
     }
-    
-    
 }

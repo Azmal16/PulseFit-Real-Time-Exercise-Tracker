@@ -18,14 +18,18 @@ class PoseEstimationViewModel: ObservableObject {
     
     private var model: VNCoreMLModel
     private var request: VNCoreMLRequest?
+    private let decoder: PoseEstimationDecoder
     
     @Published var cameraViewModel: CameraViewModel?
     @Published var leftShoulderPoint: CGPoint?
     @Published var rightShoulderPoint: CGPoint?
     
+    @Published var keypoints: [String: CGPoint] = [:]
+    
     var delegate: PoseEstimationView?
     
-    init() {
+    init(imageWidth: CGFloat, imageHeight: CGFloat) {
+        decoder = PoseEstimationDecoder(imageWidth: imageWidth, imageHeight: imageHeight)
         // Load the YOLOv11 model from the .mlpackage file
         let mlModel = try! yolo11n_pose(configuration: .init()).model
         model = try! VNCoreMLModel(for: mlModel)
@@ -57,20 +61,20 @@ class PoseEstimationViewModel: ObservableObject {
          guard let observations = observations as? [VNCoreMLFeatureValueObservation],
                let multiArray = observations.first?.featureValue.multiArrayValue else { return }
          
-         let keypoints = extractKeypoints(from: multiArray)
+        // let keypoints = extractKeypoints(from: multiArray)
          
          // Update left and right shoulder points
          DispatchQueue.main.async { [weak self] in
-             self?.leftShoulderPoint = keypoints.leftShoulder
-             self?.rightShoulderPoint = keypoints.rightShoulder
+            
+             self?.keypoints = (self?.decoder.decodePose(from: multiArray))!
+             print("Decoded Keypoints: \(self?.keypoints)")
              
-             if let lponit = keypoints.leftShoulder, let rpoint = keypoints.rightShoulder {
-                 
-                 self?.delegate?.points(left: lponit, right: rpoint)
-             }
          }
      }
      
+    
+    
+    
      private func extractKeypoints(from multiArray: MLMultiArray) -> (leftShoulder: CGPoint?, rightShoulder: CGPoint?) {
          // Indices for shoulders (example: use actual indices for YOLO model)
          let leftShoulderIndex = 5

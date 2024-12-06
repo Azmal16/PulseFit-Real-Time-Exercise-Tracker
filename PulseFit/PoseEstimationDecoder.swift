@@ -18,11 +18,18 @@ class PoseEstimationDecoder {
         self.imageHeight = imageHeight
     }
     
-    func decodePose(from output: MLMultiArray) -> [CGPoint] {
+    func decodePose(from output: MLMultiArray) -> [String: CGPoint] {
         let shape = [56, 5040] // Output shape from your model
         let reshapedOutput = output.reshape(to: shape)
         
-        var keypoints: [CGPoint] = []
+        let keypointNames = [
+            "nose", "leftEye", "rightEye", "leftEar", "rightEar",
+            "leftShoulder", "rightShoulder", "leftElbow", "rightElbow",
+            "leftWrist", "rightWrist", "leftHip", "rightHip",
+            "leftKnee", "rightKnee", "leftAnkle", "rightAnkle"
+        ]
+        
+        var keypoints: [String: CGPoint] = [:]
         
         for gridIdx in 0..<5040 {
             for kpIdx in 0..<numKeypoints {
@@ -34,10 +41,11 @@ class PoseEstimationDecoder {
                 if confidence > confidenceThreshold {
                     let x = CGFloat(xNorm) * imageWidth
                     let y = CGFloat(yNorm) * imageHeight
-                    keypoints.append(CGPoint(x: x, y: y))
+                    keypoints[keypointNames[kpIdx]] = CGPoint(x: x, y: y)
                 }
             }
         }
+        
         return keypoints
     }
 }
