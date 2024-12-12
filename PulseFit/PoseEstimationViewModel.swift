@@ -20,7 +20,6 @@ class PoseEstimationViewModel: ObservableObject {
     private var request: VNCoreMLRequest?
     private let decoder: PoseEstimationDecoder
     
-    @Published var cameraViewModel: CameraViewModel?
     @Published var leftShoulderPoint: CGPoint?
     @Published var rightShoulderPoint: CGPoint?
     
@@ -61,14 +60,10 @@ class PoseEstimationViewModel: ObservableObject {
          guard let observations = observations as? [VNCoreMLFeatureValueObservation],
                let multiArray = observations.first?.featureValue.multiArrayValue else { return }
          
-        // let keypoints = extractKeypoints(from: multiArray)
-         
-         // Update left and right shoulder points
-         DispatchQueue.main.async { [weak self] in
+        DispatchQueue.main.async { [weak self] in
             
              self?.keypoints = (self?.decoder.decodePose(from: multiArray))!
              print("Decoded Keypoints: \(self?.keypoints)")
-             
          }
      }
      

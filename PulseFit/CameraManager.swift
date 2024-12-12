@@ -3,21 +3,27 @@ import AVFoundation
 class CameraManager: NSObject, ObservableObject {
     private var session: AVCaptureSession?
     private var videoOutput: AVCaptureVideoDataOutput?
-    @Published var poseEstimationViewModel: PoseEstimationViewModel
+    @Published var previewLayer: AVCaptureVideoPreviewLayer?
     
-    init(poseEstimationViewModel: PoseEstimationViewModel) {
-        self.poseEstimationViewModel = poseEstimationViewModel
+    override init() {
+        super.init()
+        self.setupCamera()
     }
     
-//    @Published var leftShoulderPoint: CGPoint?
-//    @Published var rightShoulderPoint: CGPoint?
+    private func setupCamera() {
+        setupSession()
+        if let session = getSession() {
+            previewLayer = AVCaptureVideoPreviewLayer(session: session)
+            previewLayer?.videoGravity = .resizeAspectFill
+        }
+    }
     
     // Setup the camera session
     func setupSession() {
         session = AVCaptureSession()
         session?.sessionPreset = .high
         
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
               let input = try? AVCaptureDeviceInput(device: camera) else {
             print("Failed to access the camera")
             return
@@ -66,12 +72,10 @@ class CameraManager: NSObject, ObservableObject {
 // Video data output delegate
 extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        guard CMSampleBufferGetImageBuffer(sampleBuffer) != nil else { return }
         
-        // Pass the pixelBuffer to the PoseEstimationViewModel for processing
         DispatchQueue.global(qos: .userInitiated).async {
-                    self.poseEstimationViewModel.performPoseEstimation(on: pixelBuffer)
-                }
-//        poseEstimationViewModel.performPoseEstimation(on: pixelBuffer)
+            
+        }
     }
 }
